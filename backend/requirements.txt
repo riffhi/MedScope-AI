@@ -24,6 +24,10 @@ sentence-transformers>=2.2.0
 
 # Image Processing
 Pillow>=10.0.0
+opencv-python>=4.5.0
+
+# PDF Generation
+reportlab>=4.0.0
 
 # Data Processing
 pandas>=2.0.0
