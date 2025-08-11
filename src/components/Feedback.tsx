@@ -67,7 +67,7 @@ const Feedback: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="max-w-4xl mx-auto">
           {/* Feedback Form */}
           <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
             <div className="p-6 border-b border-slate-700/50">
@@ -190,100 +190,6 @@ const Feedback: React.FC = () => {
                 <Send className="w-4 h-4" />
                 <span>Submit Feedback</span>
               </button>
-            </div>
-          </div>
-
-          {/* Contact & Support */}
-          <div className="space-y-6">
-            {/* Quick Support */}
-            <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
-              <div className="p-6 border-b border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white">
-                  Quick Support
-                </h3>
-              </div>
-              <div className="p-6 space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
-                  <div className="w-10 h-10 bg-blue-500/30 rounded-full flex items-center justify-center">
-                    <MessageCircle className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-slate-200">Live Chat</h4>
-                    <p className="text-sm text-slate-400">
-                      Get instant help from our AI assistant
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
-                  <div className="w-10 h-10 bg-emerald-500/30 rounded-full flex items-center justify-center">
-                    <span className="text-emerald-400 font-semibold">?</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-slate-200">
-                      Documentation
-                    </h4>
-                    <p className="text-sm text-slate-400">
-                      Browse our comprehensive user guides
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 bg-purple-500/20 rounded-lg border border-purple-500/30">
-                  <div className="w-10 h-10 bg-purple-500/30 rounded-full flex items-center justify-center">
-                    <span className="text-purple-400 font-semibold">📧</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-slate-200">
-                      Email Support
-                    </h4>
-                    <p className="text-sm text-slate-400">
-                      support@medscope-ai.com
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* System Status */}
-            <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
-              <div className="p-6 border-b border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white">
-                  System Status
-                </h3>
-              </div>
-              <div className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">API Status</span>
-                  <span className="flex items-center text-sm text-emerald-400">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                    Operational
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">AI Processing</span>
-                  <span className="flex items-center text-sm text-emerald-400">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                    Normal
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">File Upload</span>
-                  <span className="flex items-center text-sm text-emerald-400">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                    Available
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">
-                    3D Visualization
-                  </span>
-                  <span className="flex items-center text-sm text-amber-400">
-                    <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
-                    Maintenance
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>

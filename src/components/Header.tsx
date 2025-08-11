@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, Settings, User, Globe, Download, LogOut } from "lucide-react";
+import { User, Globe, LogOut } from "lucide-react";
 
 interface User {
   email: string;
@@ -68,23 +68,6 @@ const Header: React.FC<HeaderProps> = ({
             </select>
             <Globe className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
-
-          {/* PDF Export */}
-          <button className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 border border-emerald-500/30">
-            <Download className="w-4 h-4" />
-            <span className="text-sm font-medium">Export PDF</span>
-          </button>
-
-          {/* Notifications */}
-          <button className="relative p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition-colors duration-200">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
-
-          {/* Settings */}
-          <button className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition-colors duration-200">
-            <Settings className="w-5 h-5" />
-          </button>
 
           {/* Profile */}
           <div className="relative">

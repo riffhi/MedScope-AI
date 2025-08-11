@@ -262,7 +262,7 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content Grid */}
       <div className="px-6 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="w-full max-w-full">
           {/* Recent Activity with Search */}
           <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-700/50">
             <div className="p-6 border-b border-slate-700/50">
@@ -408,43 +408,6 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-700/50">
-            <div className="p-6 border-b border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white">
-                Quick Actions
-              </h3>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <button className="flex flex-col items-center p-4 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-colors duration-200 border border-blue-500/30">
-                  <Brain className="w-8 h-8 text-blue-400 mb-2" />
-                  <span className="text-sm font-medium text-blue-300">
-                    New MRI Analysis
-                  </span>
-                </button>
-                <button className="flex flex-col items-center p-4 bg-teal-500/20 rounded-lg hover:bg-teal-500/30 transition-colors duration-200 border border-teal-500/30">
-                  <Activity className="w-8 h-8 text-teal-400 mb-2" />
-                  <span className="text-sm font-medium text-teal-300">
-                    CT Scan Review
-                  </span>
-                </button>
-                <button className="flex flex-col items-center p-4 bg-purple-500/20 rounded-lg hover:bg-purple-500/30 transition-colors duration-200 border border-purple-500/30">
-                  <FileText className="w-8 h-8 text-purple-400 mb-2" />
-                  <span className="text-sm font-medium text-purple-300">
-                    Generate Report
-                  </span>
-                </button>
-                <button className="flex flex-col items-center p-4 bg-emerald-500/20 rounded-lg hover:bg-emerald-500/30 transition-colors duration-200 border border-emerald-500/30">
-                  <Users className="w-8 h-8 text-emerald-400 mb-2" />
-                  <span className="text-sm font-medium text-emerald-300">
-                    Patient Manager
-                  </span>
-                </button>
-              </div>
             </div>
           </div>
         </div>

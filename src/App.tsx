@@ -7,7 +7,7 @@ import SignupModal from "./components/SignupModal";
 import Sidebar from "./Sidebar";
 import Dashboard from "./components/Dashboard";
 import Visualization3D from "./Visualization3D";
-import ReportAnalyzer from "./components/ReportAnalyzer";
+import MedicalScanUploader from "./components/MedicalScanUploader";
 import Feedback from "./components/Feedback";
 
 interface User {
@@ -66,8 +66,8 @@ function App() {
         return <Dashboard />;
       case "visualization":
         return <Visualization3D />;
-      case "analyzer":
-        return <ReportAnalyzer />;
+      case "scan-analysis":
+        return <MedicalScanUploader />;
       case "feedback":
         return <Feedback />;
       default:

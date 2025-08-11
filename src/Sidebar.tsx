@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutDashboard, FileText, Star, Eye, Zap } from "lucide-react";
+import { LayoutDashboard, Star, Eye, Zap, Scan } from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
@@ -10,7 +10,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "visualization", label: "2D to 3D Viewer", icon: Eye },
-    { id: "analyzer", label: "Report Analyzer", icon: FileText },
+    { id: "scan-analysis", label: "Medical Scan Analysis", icon: Scan },
     { id: "feedback", label: "Feedback", icon: Star },
   ];
 
