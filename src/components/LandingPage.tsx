@@ -13,44 +13,40 @@ import {
   Star,
 } from "lucide-react";
 
-interface LandingPageProps {
-  onGetStarted: () => void;
-}
-
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+const LandingPage = ({ onGetStarted }) => {
   const features = [
     {
-      icon: <Brain className="w-8 h-8 text-blue-600" />,
+      icon: <Brain className="w-8 h-8 text-cyan-400" />,
       title: "AI-Powered Analysis",
       description:
         "Advanced machine learning algorithms for accurate medical image analysis and diagnosis assistance.",
     },
     {
-      icon: <Eye className="w-8 h-8 text-green-600" />,
+      icon: <Eye className="w-8 h-8 text-emerald-400" />,
       title: "3D Visualization",
       description:
         "Convert 2D medical scans into interactive 3D models for better understanding and analysis.",
     },
     {
-      icon: <FileText className="w-8 h-8 text-purple-600" />,
+      icon: <FileText className="w-8 h-8 text-violet-400" />,
       title: "Report Analysis",
       description:
         "Intelligent parsing and analysis of medical reports with AI-powered insights.",
     },
     {
-      icon: <Activity className="w-8 h-8 text-red-600" />,
+      icon: <Activity className="w-8 h-8 text-rose-400" />,
       title: "Real-time Monitoring",
       description:
         "Continuous monitoring of patient data with instant alerts and recommendations.",
     },
     {
-      icon: <Users className="w-8 h-8 text-orange-600" />,
+      icon: <Users className="w-8 h-8 text-amber-400" />,
       title: "Collaborative Platform",
       description:
         "Seamless collaboration between healthcare professionals with shared access to data.",
     },
     {
-      icon: <Shield className="w-8 h-8 text-indigo-600" />,
+      icon: <Shield className="w-8 h-8 text-indigo-400" />,
       title: "HIPAA Compliant",
       description:
         "Enterprise-grade security ensuring patient data privacy and regulatory compliance.",
@@ -65,18 +61,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
       {/* Hero Section */}
       <section className="relative pt-20 pb-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
-            <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-8">
+            <h1 className="text-4xl sm:text-6xl font-bold text-white mb-8">
               The Future of{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-400">
                 Medical AI
               </span>
             </h1>
-            <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
               MedScope-AI revolutionizes healthcare with cutting-edge artificial
               intelligence, 3D visualization, and comprehensive medical analysis
               tools designed for modern healthcare professionals.
@@ -85,40 +81,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
               <button
                 onClick={onGetStarted}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center gap-2 transform hover:scale-105"
+                className="bg-gradient-to-r from-cyan-500 to-violet-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-cyan-400 hover:to-violet-500 transition-all duration-300 flex items-center gap-2 transform hover:scale-105 shadow-lg hover:shadow-cyan-500/25"
               >
-                Get Started Free
+                Get Started
                 <ArrowRight className="w-5 h-5" />
               </button>
-              <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg hover:border-gray-400 transition-colors duration-300 flex items-center gap-2">
-                <Play className="w-5 h-5" />
-                Watch Demo
-              </button>
+              
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                  <div className="text-3xl font-bold text-white mb-2">
                     {stat.number}
                   </div>
-                  <div className="text-gray-600">{stat.label}</div>
+                  <div className="text-gray-400">{stat.label}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
+
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gray-900/50 pointer-events-none"></div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               Powerful Features for Modern Healthcare
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               Comprehensive tools designed to enhance medical practice and
               improve patient outcomes.
             </p>
@@ -128,13 +124,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gray-50 rounded-xl p-8 hover:shadow-lg transition-shadow duration-300"
+                className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-8 hover:bg-gray-800/70 hover:border-gray-600/50 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300 group"
               >
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <div className="mb-4 group-hover:scale-110 transition-transform duration-300">{feature.icon}</div>
+                <h3 className="text-xl font-semibold text-white mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <p className="text-gray-300">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -142,7 +138,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-cyan-900/80 to-violet-900/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="text-center text-white">
             <h2 className="text-3xl sm:text-4xl font-bold mb-8">
@@ -150,28 +146,28 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-              <div className="text-center">
-                <Zap className="w-12 h-12 text-yellow-300 mx-auto mb-4" />
+              <div className="text-center group">
+                <Zap className="w-12 h-12 text-yellow-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
                 <h3 className="text-xl font-semibold mb-3">Lightning Fast</h3>
-                <p className="text-blue-100">
+                <p className="text-cyan-100">
                   Get results in seconds, not hours. Our AI processes medical
                   data at unprecedented speeds.
                 </p>
               </div>
 
-              <div className="text-center">
-                <CheckCircle className="w-12 h-12 text-green-300 mx-auto mb-4" />
+              <div className="text-center group">
+                <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
                 <h3 className="text-xl font-semibold mb-3">Proven Accuracy</h3>
-                <p className="text-blue-100">
+                <p className="text-cyan-100">
                   95% accuracy rate validated by leading medical institutions
                   worldwide.
                 </p>
               </div>
 
-              <div className="text-center">
-                <Star className="w-12 h-12 text-yellow-300 mx-auto mb-4" />
+              <div className="text-center group">
+                <Star className="w-12 h-12 text-yellow-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
                 <h3 className="text-xl font-semibold mb-3">Award Winning</h3>
-                <p className="text-blue-100">
+                <p className="text-cyan-100">
                   Recognized by healthcare innovation awards and trusted by
                   professionals globally.
                 </p>
@@ -182,7 +178,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-8">
             Ready to Transform Your Medical Practice?
@@ -193,7 +189,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           </p>
           <button
             onClick={onGetStarted}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+            className="bg-gradient-to-r from-cyan-500 to-violet-600 text-white px-10 py-4 rounded-lg font-semibold text-lg hover:from-cyan-400 hover:to-violet-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-cyan-500/25"
           >
             Start Your Free Trial
           </button>
