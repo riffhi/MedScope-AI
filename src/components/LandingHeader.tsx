@@ -13,7 +13,7 @@ const LandingHeader: React.FC<LandingHeaderProps> = ({ onLogin, onSignup }) => {
           {/* Logo */}
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <Microscope className="w-6 h-6 text-white" />
+              <span className="text-white font-bold text-lg">M</span>
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">MedScope AI</h1>
