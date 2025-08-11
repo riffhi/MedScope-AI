@@ -5,10 +5,12 @@ import LandingPage from "./components/LandingPage";
 import LoginModal from "./components/LoginModal";
 import SignupModal from "./components/SignupModal";
 import Sidebar from "./Sidebar";
-import Dashboard from "./components/Dashboard";
+import DoctorDashboard from './components/DoctorsDashboard';
+import UserDashboard from "./components/UserDashboard";
 import Visualization3D from "./Visualization3D";
 import MedicalScanUploader from "./components/MedicalScanUploader";
 import Feedback from "./components/Feedback";
+import FindMRICentre from "./components/FindMRICentre";
 
 // Define the User and UserData types for type safety
 interface User {
@@ -36,10 +38,11 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
 
   const handleLogin = (email: string) => {
-    // Simulate login
-    setUser({ email, name: "Dr. Smith" });
+    // Simulate login for a doctor
+    setUser({ email, name: "Dr. Smith", role: "doctor" });
     setIsAuthenticated(true);
     setShowLoginModal(false);
+    setActiveTab("dashboard");
   };
 
   const handleSignup = (userData: UserData) => {
@@ -52,6 +55,7 @@ function App() {
     });
     setIsAuthenticated(true);
     setShowSignupModal(false);
+    setActiveTab("dashboard");
   };
 
   const handleLogout = () => {
@@ -60,19 +64,35 @@ function App() {
     setActiveTab("dashboard");
   };
 
-  // Renders the main content based on the active sidebar tab
+  // Renders the main content based on the active sidebar tab and user role
   const renderContent = () => {
-    switch (activeTab) {
-      case "dashboard":
-        return <Dashboard />;
-      case "visualization":
-        return <Visualization3D />;
-      case "scan-analysis":
-        return <MedicalScanUploader />;
-      case "feedback":
-        return <Feedback />;
-      default:
-        return <Dashboard />;
+    const isDoctor = user?.role && user.role !== "patient";
+
+    if (isDoctor) {
+      switch (activeTab) {
+        case "dashboard":
+          return <DoctorDashboard />;
+        case "visualization":
+          return <Visualization3D />;
+        case "scan-analysis":
+          return <MedicalScanUploader />;
+        case "feedback":
+          return <Feedback />;
+        default:
+          return <DoctorDashboard />;
+      }
+    } else {
+      // Patient View
+      switch (activeTab) {
+        case "dashboard":
+          return <UserDashboard user={user} />;
+        case "find-centre":
+          return <FindMRICentre />;
+        case "feedback":
+          return <Feedback />;
+        default:
+          return <UserDashboard user={user} />;
+      }
     }
   };
 
@@ -115,7 +135,11 @@ function App() {
       <Header user={user} onLogout={handleLogout} />
 
       <div className="flex">
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <Sidebar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          userRole={user?.role}
+        />
         <main className="flex-1 p-6">{renderContent()}</main>
       </div>
     </div>

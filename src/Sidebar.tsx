@@ -1,18 +1,38 @@
 import React from "react";
-import { LayoutDashboard, Star, Eye, Zap, Scan } from "lucide-react";
+import {
+  LayoutDashboard,
+  Star,
+  Eye,
+  Zap,
+  Scan,
+  MapPin,
+} from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  userRole?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
-  const menuItems = [
+const Sidebar: React.FC<SidebarProps> = ({
+  activeTab,
+  onTabChange,
+  userRole,
+}) => {
+  const doctorMenuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "visualization", label: "2D to 3D Viewer", icon: Eye },
     { id: "scan-analysis", label: "Medical Scan Analysis", icon: Scan },
     { id: "feedback", label: "Feedback", icon: Star },
   ];
+
+  const userMenuItems = [
+    { id: "dashboard", label: "My Dashboard", icon: LayoutDashboard },
+    { id: "find-centre", label: "Find MRI Centre", icon: MapPin },
+    { id: "feedback", label: "Feedback", icon: Star },
+  ];
+
+  const menuItems = userRole === "patient" ? userMenuItems : doctorMenuItems;
 
   return (
     <aside className="w-64 bg-slate-900 shadow-2xl border-r border-slate-700 h-screen sticky top-0">

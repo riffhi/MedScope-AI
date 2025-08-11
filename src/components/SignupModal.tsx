@@ -31,7 +31,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
     password: "",
     confirmPassword: "",
     organization: "",
-    role: "doctor",
+    role: "patient",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -163,6 +163,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                 required
               >
+                <option value="patient">Patient</option>
                 <option value="doctor">Doctor</option>
                 <option value="nurse">Nurse</option>
                 <option value="radiologist">Radiologist</option>

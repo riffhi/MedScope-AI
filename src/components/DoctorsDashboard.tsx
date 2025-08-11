@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import FloatingAIChatbot from "./FloatingAIChatbot";
 
-const Dashboard: React.FC = () => {
+const DoctorDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
@@ -422,4 +422,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default DoctorDashboard;
