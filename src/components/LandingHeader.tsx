@@ -1,11 +1,15 @@
 import React from "react";
+import { Microscope } from "lucide-react";
 
 interface LandingHeaderProps {
   onLogin: () => void;
   onSignup: () => void;
 }
 
-const LandingHeader: React.FC<LandingHeaderProps> = ({ onLogin, onSignup }) => {
+const LandingHeader: React.FC<LandingHeaderProps> = ({
+  onLogin,
+  onSignup,
+}) => {
   return (
     <header className="absolute top-0 left-0 right-0 z-40 bg-gray-900/90 backdrop-blur-sm border-b border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
