@@ -1,0 +1,46 @@
+# Flask and web framework
+Flask==3.0.0
+Flask-Cors==4.0.0
+python-dotenv==1.0.0
+gunicorn==21.2.0
+Werkzeug==3.0.1
+
+# Database
+SQLAlchemy==2.0.23
+Flask-SQLAlchemy==3.1.1
+alembic==1.13.1
+
+# LangChain and LLM
+langchain>=0.1.0
+langchain-google-genai>=0.0.5
+langchain-community>=0.0.10
+langchain-core>=0.1.0
+
+# Google APIs
+google-auth==2.23.4
+
+# Vector Database
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+pydantic>=2.0.0
+
+# Security and Utilities
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+cryptography>=40.0.0
+bcrypt>=4.0.0
+python-dateutil>=2.8.0
+
+# WebSocket
+Flask-Sockets==0.2.1
+
+# Testing
+pytest==7.4.3
+httpx==0.25.2
