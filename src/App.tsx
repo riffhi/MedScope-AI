@@ -10,6 +10,7 @@ import Visualization3D from "./Visualization3D";
 import MedicalScanUploader from "./components/MedicalScanUploader";
 import Feedback from "./components/Feedback";
 
+// Define the User and UserData types for type safety
 interface User {
   email: string;
   name: string;
@@ -30,20 +31,19 @@ interface UserData {
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [currentLanguage, setCurrentLanguage] = useState("en");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
   const handleLogin = (email: string) => {
-    // Simulate login - in real app, this would call your API
+    // Simulate login
     setUser({ email, name: "Dr. Smith" });
     setIsAuthenticated(true);
     setShowLoginModal(false);
   };
 
   const handleSignup = (userData: UserData) => {
-    // Simulate signup - in real app, this would call your API
+    // Simulate signup
     setUser({
       email: userData.email,
       name: `${userData.firstName} ${userData.lastName}`,
@@ -60,6 +60,7 @@ function App() {
     setActiveTab("dashboard");
   };
 
+  // Renders the main content based on the active sidebar tab
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
@@ -75,13 +76,11 @@ function App() {
     }
   };
 
-  // Show landing page if not authenticated
+  // --- View for Unauthenticated (Logged-Out) Users ---
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gray-50">
         <LandingHeader
-          currentLanguage={currentLanguage}
-          onLanguageChange={setCurrentLanguage}
           onLogin={() => setShowLoginModal(true)}
           onSignup={() => setShowSignupModal(true)}
         />
@@ -111,20 +110,13 @@ function App() {
     );
   }
 
-  // Show main application if authenticated
   return (
-    <div className="min-h-screen bg-slate-900">
-      <Header
-        currentLanguage={currentLanguage}
-        onLanguageChange={setCurrentLanguage}
-        user={user}
-        onLogout={handleLogout}
-      />
+    <div className="min-h-screen bg-slate-900 text-white">
+      <Header user={user} onLogout={handleLogout} />
 
       <div className="flex">
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-
-        <main className="flex-1">{renderContent()}</main>
+        <main className="flex-1 p-6">{renderContent()}</main>
       </div>
     </div>
   );

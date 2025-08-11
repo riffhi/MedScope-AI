@@ -1,29 +1,15 @@
 import React from "react";
-import { Globe } from "lucide-react";
+import { Microscope } from "lucide-react";
 
 interface LandingHeaderProps {
-  currentLanguage: string;
-  onLanguageChange: (lang: string) => void;
   onLogin: () => void;
   onSignup: () => void;
 }
 
 const LandingHeader: React.FC<LandingHeaderProps> = ({
-  currentLanguage,
-  onLanguageChange,
   onLogin,
   onSignup,
 }) => {
-  const languages = [
-    { code: "en", name: "English" },
-    { code: "es", name: "Español" },
-    { code: "fr", name: "Français" },
-    { code: "de", name: "Deutsch" },
-    { code: "zh", name: "中文" },
-    { code: "ja", name: "日本語" },
-    { code: "ar", name: "العربية" },
-  ];
-
   return (
     <header className="absolute top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,7 +17,7 @@ const LandingHeader: React.FC<LandingHeaderProps> = ({
           {/* Logo */}
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">M</span>
+              <Microscope className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">MedScope AI</h1>
@@ -45,12 +31,6 @@ const LandingHeader: React.FC<LandingHeaderProps> = ({
               className="text-gray-600 hover:text-blue-600 font-medium transition-colors"
             >
               Features
-            </a>
-            <a
-              href="#pricing"
-              className="text-gray-600 hover:text-blue-600 font-medium transition-colors"
-            >
-              Pricing
             </a>
             <a
               href="#about"
@@ -68,22 +48,6 @@ const LandingHeader: React.FC<LandingHeaderProps> = ({
 
           {/* Right side */}
           <div className="flex items-center space-x-4">
-            {/* Language Selector */}
-            <div className="relative">
-              <select
-                value={currentLanguage}
-                onChange={(e) => onLanguageChange(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm font-medium text-gray-700 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.name}
-                  </option>
-                ))}
-              </select>
-              <Globe className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-            </div>
-
             {/* Auth Buttons */}
             <div className="flex items-center space-x-3">
               <button

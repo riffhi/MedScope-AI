@@ -1,0 +1,24 @@
+/* src/components/GoogleTranslate.css */
+.translator-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+#custom-translator-select {
+  background-color: #4A5568; /* A dark gray that matches your theme */
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #718096;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#custom-translator-select:hover {
+  background-color: #2D3748;
+}
+
+#custom-translator-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5); /* A blue focus ring */
+}

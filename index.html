@@ -5,9 +5,200 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MedScope AI Medical Dashboard</title>
+
+    <!-- 1. CSS for the translator UI (Banner and Widget) -->
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        /* Add padding to the top to prevent content from being hidden by the fixed banner */
+        padding-top: 50px;
+      }
+
+      .google-translate-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10000; /* High z-index to stay on top */
+        background: #f8f9fa;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .translate-dropdown {
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+      
+      #google_translate_container {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 9999;
+        background: white;
+        border: 1px solid #ddd;
+        padding: 4px 8px;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* This class makes the corner widget visible */
+      #google_translate_container.active {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .google-translate-bar button {
+        padding: 4px 10px;
+        margin-left: 8px;
+        cursor: pointer;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background: white;
+        font-size: 13px;
+      }
+      
+      #remove-translate-btn {
+        font-size: 12px;
+        background-color: #ef4444; /* Red color for removal */
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+    </style>
   </head>
+
   <body>
+    <!-- 2. HTML for the UI elements -->
+    
+    <!-- Top banner for translation -->
+    <div class="google-translate-bar" id="google_translate_banner">
+      <div>
+        <strong>Translate page:</strong>
+        <select class="translate-dropdown" id="banner_translate_element">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="bn">বাংলা</option>
+          <option value="te">తెలుగు</option>
+          <option value="ta">தமிழ்</option>
+        </select>
+      </div>
+      <div>
+        <button id="show-original-btn">Show Original</button>
+        <button id="close-translate-btn" title="Close banner">×</button>
+      </div>
+    </div>
+
+    <!-- Corner floating widget (initially hidden) -->
+    <div id="google_translate_container">
+      <div id="google_translate_element"></div>
+      <button id="remove-translate-btn" title="Remove Widget">✖</button>
+    </div>
+
+    <!-- Your React app content will be rendered here -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- 3. JavaScript for Google Translate Setup -->
+    <script>
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: "en",
+            includedLanguages: "en,hi,bn,te,ta",
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+          },
+          "google_translate_element"
+        );
+        waitForTranslateDropdown();
+      }
+
+      function waitForTranslateDropdown() {
+        // Google's widget takes a moment to initialize. We wait for it.
+        const googleCombo = document.querySelector(".goog-te-combo");
+        if (!googleCombo) {
+          setTimeout(waitForTranslateDropdown, 200);
+          return;
+        }
+
+        const bannerSelect = document.getElementById("banner_translate_element");
+
+        // Sync from our banner to Google's widget
+        bannerSelect.addEventListener("change", () => {
+          googleCombo.value = bannerSelect.value;
+          googleCombo.dispatchEvent(new Event("change"));
+        });
+
+        // Sync from Google's widget back to our banner
+        googleCombo.addEventListener("change", () => {
+          bannerSelect.value = googleCombo.value || "en";
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const showOriginalBtn = document.getElementById("show-original-btn");
+        const closeBannerBtn = document.getElementById("close-translate-btn");
+        const removeWidgetBtn = document.getElementById("remove-translate-btn");
+        
+        // "Show Original" button logic
+        if(showOriginalBtn) {
+            showOriginalBtn.addEventListener("click", () => {
+              const googleCombo = document.querySelector(".goog-te-combo");
+              if (googleCombo) {
+                googleCombo.value = "en"; // Reset to English
+                googleCombo.dispatchEvent(new Event("change"));
+                document.getElementById("banner_translate_element").value = "en";
+                
+                // This part helps remove the #googtrans hash from the URL
+                if (window.location.hash.includes("googtrans")) {
+                    window.location.hash = "";
+                    window.location.reload();
+                }
+              }
+            });
+        }
+
+        // "Close Banner" button logic
+        if(closeBannerBtn) {
+            closeBannerBtn.addEventListener("click", () => {
+              document.getElementById("google_translate_banner").style.display = 'none';
+              // Show the corner widget as a replacement
+              document.getElementById("google_translate_container").classList.add("active");
+            });
+        }
+
+        // "Remove Widget" button logic
+        if(removeWidgetBtn) {
+            removeWidgetBtn.addEventListener("click", () => {
+              document.getElementById("google_translate_container").remove();
+            });
+        }
+      });
+
+      // Google often adds its own top banner. This function hides it.
+      function hideGoogleBanner() {
+        const iframe = document.querySelector(".goog-te-banner-frame");
+        if (iframe) {
+            iframe.style.display = "none";
+            document.body.style.top = '0px'; // Reset body position
+        }
+        setTimeout(hideGoogleBanner, 100);
+      }
+      hideGoogleBanner();
+    </script>
+    
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   </body>
 </html>
