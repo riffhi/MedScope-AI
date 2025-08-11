@@ -19,8 +19,7 @@ langchain-core>=0.1.0
 # Google APIs
 google-auth==2.23.4
 
-# Vector Database
-chromadb>=0.4.0
+# Vector Databasechromadb>=0.4.0
 sentence-transformers>=2.2.0
 
 # Image Processing

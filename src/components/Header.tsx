@@ -1,6 +1,7 @@
 import React from "react";
 import { User, LogOut } from "lucide-react";
 
+// Define the structure for the User object
 interface User {
   email: string;
   name: string;
@@ -8,19 +9,22 @@ interface User {
   organization?: string;
 }
 
+// Define the props for the Header component
 interface HeaderProps {
   user?: User | null;
   onLogout?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
   return (
     <header className="bg-slate-900 shadow-lg border-b border-slate-700 px-6 py-4">
       <div className="flex items-center justify-between">
+        {/* Logo and Application Title */}
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg border border-blue-400/30">
-              <span className="text-white font-bold text-lg">M</span>
+              <Microscope className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">MedScope AI</h1>
@@ -42,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
             </button>
           </div>
 
-          {/* Logout */}
+          {/* Logout Button */}
           {onLogout && (
             <button
               onClick={onLogout}
