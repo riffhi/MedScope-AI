@@ -111,7 +111,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-slate-900">
       <Header user={user} onLogout={handleLogout} />
 
       <div className="flex">

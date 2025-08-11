@@ -1,8 +1,8 @@
 import React from "react";
-import { User, LogOut, Microscope } from "lucide-react";
+import { User as UserIcon, LogOut } from "lucide-react";
 
 // Define the structure for the User object
-interface User {
+interface UserType {
   email: string;
   name: string;
   role?: string;
@@ -11,7 +11,7 @@ interface User {
 
 // Define the props for the Header component
 interface HeaderProps {
-  user?: User | null;
+  user?: UserType | null;
   onLogout?: () => void;
 }
 
@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg border border-blue-400/30">
-              <Microscope className="w-6 h-6 text-white" />
+              <span className="text-white font-bold text-lg">M</span>
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">MedScope AI</h1>
@@ -35,10 +35,10 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Profile Section */}
+          {/* Profile */}
           <div className="relative">
             <button className="flex items-center space-x-2 p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition-colors duration-200">
-              <User className="w-5 h-5" />
+              <UserIcon className="w-5 h-5" />
               <span className="text-sm font-medium text-slate-200">
                 {user?.name || "User"}
               </span>
