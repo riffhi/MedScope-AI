@@ -1,30 +1,27 @@
 from flask import Flask
 from flask_cors import CORS
 from .core.config import settings
-from .core.database import db
-from .api.routes.auth_simple import auth_bp
-from .api.routes.reports_simple import reports_bp
-from .api.routes.analysis_simple import analysis_bp
-from .api.routes.chat_simple import chat_bp
-from .models import Base
 import os
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(settings)
-
+    
+    # Basic CORS configuration
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    
     # Ensure upload and log directories exist
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    os.makedirs(os.path.dirname(settings.LOG_FILE), exist_ok=True)
+    upload_dir = getattr(settings, 'UPLOAD_DIR', './uploads')
+    log_file = getattr(settings, 'LOG_FILE', './logs/medbot.log')
+    
+    os.makedirs(upload_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
-    # Initialize extensions
-    CORS(app, resources={r"/api/*": {"origins": settings.ALLOWED_ORIGINS}})
-    db.init_app(app)
-
-    with app.app_context():
-        Base.metadata.create_all(bind=db.engine)
-
-    # Register blueprints
+    # Import and register blueprints
+    from .api.routes.auth_simple import auth_bp
+    from .api.routes.reports_simple import reports_bp
+    from .api.routes.analysis_simple import analysis_bp
+    from .api.routes.chat_simple import chat_bp
+    
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(reports_bp, url_prefix='/api/v1/reports')
     app.register_blueprint(analysis_bp, url_prefix='/api/v1/analysis')
@@ -33,7 +30,7 @@ def create_app():
     @app.route("/")
     def root():
         return {
-            "message": "MedBOT API",
+            "message": "MedScope AI API",
             "version": "1.0.0",
             "status": "running"
         }

@@ -1,25 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Zap, FileText, Brain } from 'lucide-react';
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-}
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Send,
+  Bot,
+  User,
+  Zap,
+  FileText,
+  Brain,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+import { useChatbot } from "../hooks/useChatbot";
 
 const Chatbot: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hello! I'm your AI medical assistant. I can help you with medical imaging analysis, interpret reports, and answer clinical questions. How can I assist you today?",
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ]);
-  const [inputText, setInputText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [inputText, setInputText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Use the custom hook for chatbot functionality
+  const { messages, isTyping, sendMessage, isConnected } = useChatbot(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -30,62 +27,29 @@ const Chatbot: React.FC = () => {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isTyping) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputText,
-      sender: 'user',
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputText('');
-    setIsTyping(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: generateBotResponse(inputText),
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 1500);
-  };
-
-  const generateBotResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('mri') || input.includes('scan')) {
-      return "For MRI scans, I can help analyze various sequences including T1, T2, FLAIR, and DWI. What specific aspect of the MRI would you like me to examine? I can assess anatomy, identify potential abnormalities, or explain findings in your report.";
-    }
-    
-    if (input.includes('report') || input.includes('interpret')) {
-      return "I can help interpret medical imaging reports by breaking down complex medical terminology into clear explanations. Please share the specific findings you'd like me to explain, and I'll provide context and clinical significance.";
-    }
-    
-    if (input.includes('normal') || input.includes('abnormal')) {
-      return "When evaluating imaging studies, I look for several key factors: tissue density, anatomical positioning, symmetry, and contrast enhancement patterns. Would you like me to explain what constitutes normal vs. abnormal findings for a specific imaging modality?";
-    }
-    
-    return "That's an interesting question! I specialize in medical imaging analysis and can help with MRI, CT, X-ray interpretation, report analysis, and clinical decision support. Could you provide more specific details about what you'd like assistance with?";
+    const messageToSend = inputText;
+    setInputText("");
+    await sendMessage(messageToSend);
   };
 
   const quickQuestions = [
     "What does this MRI finding mean?",
     "Explain my CT scan results",
     "How to interpret contrast enhancement?",
-    "What are normal brain MRI findings?"
+    "What are normal brain MRI findings?",
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">AI Medical Assistant</h2>
-        <p className="text-gray-600">Get instant answers to your medical imaging questions</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          AI Medical Assistant
+        </h2>
+        <p className="text-gray-600">
+          Get instant answers to your medical imaging questions
+        </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-96">
@@ -96,10 +60,19 @@ const Chatbot: React.FC = () => {
           </div>
           <div>
             <h3 className="font-medium text-gray-900">MedScope AI Assistant</h3>
-            <p className="text-sm text-green-600 flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              Online
-            </p>
+            <div className="flex items-center space-x-1">
+              {isConnected ? (
+                <>
+                  <Wifi className="w-3 h-3 text-green-500" />
+                  <p className="text-sm text-green-600">Online</p>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-3 h-3 text-red-500" />
+                  <p className="text-sm text-red-600">Connection issues</p>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -108,32 +81,47 @@ const Chatbot: React.FC = () => {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${
+                message.sender === "user" ? "justify-end" : "justify-start"
+              }`}
             >
-              <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${
-                message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
-              }`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.sender === 'user' 
-                    ? 'bg-blue-600' 
-                    : 'bg-gray-200'
-                }`}>
-                  {message.sender === 'user' ? (
+              <div
+                className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${
+                  message.sender === "user"
+                    ? "flex-row-reverse space-x-reverse"
+                    : ""
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    message.sender === "user" ? "bg-blue-600" : "bg-gray-200"
+                  }`}
+                >
+                  {message.sender === "user" ? (
                     <User className="w-4 h-4 text-white" />
                   ) : (
                     <Bot className="w-4 h-4 text-gray-600" />
                   )}
                 </div>
-                <div className={`rounded-lg px-4 py-2 ${
-                  message.sender === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
-                }`}>
+                <div
+                  className={`rounded-lg px-4 py-2 ${
+                    message.sender === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-900"
+                  }`}
+                >
                   <p className="text-sm">{message.text}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.sender === 'user' ? 'text-blue-200' : 'text-gray-500'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <p
+                    className={`text-xs mt-1 ${
+                      message.sender === "user"
+                        ? "text-blue-200"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
                 </div>
               </div>
@@ -149,8 +137,14 @@ const Chatbot: React.FC = () => {
                 <div className="bg-gray-100 rounded-lg px-4 py-2">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -166,18 +160,26 @@ const Chatbot: React.FC = () => {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyPress={(e) =>
+                e.key === "Enter" && !e.shiftKey && handleSendMessage()
+              }
               placeholder="Ask about medical imaging, reports, or clinical questions..."
               className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button
               onClick={handleSendMessage}
-              disabled={!inputText.trim()}
+              disabled={!inputText.trim() || isTyping}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white p-2 rounded-lg transition-colors"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
+          {!isConnected && (
+            <p className="text-xs text-red-500 mt-2">
+              Connection lost. Messages will be processed when connection is
+              restored.
+            </p>
+          )}
         </div>
       </div>
 
@@ -209,19 +211,29 @@ const Chatbot: React.FC = () => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <Brain className="w-8 h-8 text-blue-600 mb-2" />
           <h4 className="font-medium text-blue-900 mb-1">Advanced Analysis</h4>
-          <p className="text-sm text-blue-800">Deep learning-powered medical image interpretation</p>
+          <p className="text-sm text-blue-800">
+            Deep learning-powered medical image interpretation
+          </p>
         </div>
-        
+
         <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
           <FileText className="w-8 h-8 text-teal-600 mb-2" />
-          <h4 className="font-medium text-teal-900 mb-1">Report Interpretation</h4>
-          <p className="text-sm text-teal-800">Clear explanations of complex medical terminology</p>
+          <h4 className="font-medium text-teal-900 mb-1">
+            Report Interpretation
+          </h4>
+          <p className="text-sm text-teal-800">
+            Clear explanations of complex medical terminology
+          </p>
         </div>
-        
+
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
           <Zap className="w-8 h-8 text-purple-600 mb-2" />
-          <h4 className="font-medium text-purple-900 mb-1">Real-time Support</h4>
-          <p className="text-sm text-purple-800">Instant answers to clinical questions 24/7</p>
+          <h4 className="font-medium text-purple-900 mb-1">
+            Real-time Support
+          </h4>
+          <p className="text-sm text-purple-800">
+            Instant answers to clinical questions 24/7
+          </p>
         </div>
       </div>
     </div>

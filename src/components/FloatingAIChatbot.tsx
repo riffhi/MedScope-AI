@@ -7,29 +7,19 @@ import {
   MessageCircle,
   Minimize2,
   Maximize2,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
-
-interface Message {
-  id: string;
-  text: string;
-  sender: "user" | "bot";
-  timestamp: Date;
-}
+import { useChatbot } from "../hooks/useChatbot";
 
 const FloatingAIChatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hello! I'm your AI medical assistant. I can help you with medical imaging analysis, interpret reports, and answer clinical questions. How can I assist you today?",
-      sender: "bot",
-      timestamp: new Date(),
-    },
-  ]);
   const [inputText, setInputText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Use the custom hook for chatbot functionality
+  const { messages, isTyping, sendMessage, isConnected } = useChatbot(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,44 +30,11 @@ const FloatingAIChatbot: React.FC = () => {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isTyping) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputText,
-      sender: "user",
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    const messageToSend = inputText;
     setInputText("");
-    setIsTyping(true);
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: generateBotResponse(),
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 2000);
-  };
-
-  const generateBotResponse = (): string => {
-    const responses = [
-      "Based on your query, I recommend reviewing the imaging protocols. Would you like me to analyze specific DICOM files?",
-      "I can help interpret those findings. The radiological patterns suggest you might want to consider additional imaging views.",
-      "For medical imaging analysis, I suggest we examine the contrast enhancement patterns. Upload the scan for detailed analysis.",
-      "This appears to be a complex case. Let me break down the differential diagnosis options for you.",
-      "The symptoms you've described could correlate with several imaging findings. Would you like me to suggest the most appropriate imaging modality?",
-      "I can assist with that diagnosis. Based on current guidelines, here are the recommended next steps for patient care.",
-      "The imaging characteristics you mentioned are consistent with several possibilities. Let's narrow down the differential diagnosis.",
-      "For accurate analysis, I'd recommend correlating with patient history and lab results. Would you like me to help interpret the clinical context?",
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    await sendMessage(messageToSend);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -123,7 +80,19 @@ const FloatingAIChatbot: React.FC = () => {
             </div>
             <div>
               <h3 className="font-semibold text-sm">AI Medical Assistant</h3>
-              <p className="text-xs text-blue-100">Online • Ready to help</p>
+              <div className="flex items-center space-x-1 text-xs text-blue-100">
+                {isConnected ? (
+                  <>
+                    <Wifi className="w-3 h-3" />
+                    <span>Online • Ready to help</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="w-3 h-3" />
+                    <span>Offline • Connection issues</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -234,6 +203,12 @@ const FloatingAIChatbot: React.FC = () => {
                   <Send className="w-4 h-4" />
                 </button>
               </div>
+              {!isConnected && (
+                <p className="text-xs text-red-500 mt-2">
+                  Connection lost. Messages will be processed when connection is
+                  restored.
+                </p>
+              )}
             </div>
           </>
         )}
