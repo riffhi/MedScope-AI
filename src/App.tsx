@@ -30,7 +30,6 @@ interface UserData {
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [currentLanguage, setCurrentLanguage] = useState("en");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -80,8 +79,6 @@ function App() {
     return (
       <div className="min-h-screen">
         <LandingHeader
-          currentLanguage={currentLanguage}
-          onLanguageChange={setCurrentLanguage}
           onLogin={() => setShowLoginModal(true)}
           onSignup={() => setShowSignupModal(true)}
         />
@@ -114,12 +111,7 @@ function App() {
   // Show main application if authenticated
   return (
     <div className="min-h-screen bg-slate-900">
-      <Header
-        currentLanguage={currentLanguage}
-        onLanguageChange={setCurrentLanguage}
-        user={user}
-        onLogout={handleLogout}
-      />
+      <Header user={user} onLogout={handleLogout} />
 
       <div className="flex">
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />

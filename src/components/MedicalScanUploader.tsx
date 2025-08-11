@@ -98,8 +98,21 @@ const MedicalScanUploader: React.FC<MedicalScanUploaderProps> = ({
     unknown: <FileText className="w-6 h-6" />,
   };
 
-  // Fetch body parts on component mount
+  // Initialize default body parts and fetch additional if available
   React.useEffect(() => {
+    // Set default body parts that will always be available
+    setBodyParts({
+      brain: "Brain and neurological structures",
+      heart: "Cardiac and cardiovascular system",
+      chest: "Chest, lungs, and thoracic cavity",
+      abdomen: "Abdominal organs and structures",
+      spine: "Spinal column and vertebrae",
+      extremities: "Arms, legs, hands, and feet",
+      breast: "Breast tissue and mammary glands",
+      unknown: "Unspecified body region",
+    });
+
+    // Still try to fetch from backend if available
     fetchBodyParts();
   }, []);
 
@@ -110,10 +123,15 @@ const MedicalScanUploader: React.FC<MedicalScanUploaderProps> = ({
       );
       if (response.ok) {
         const data = await response.json();
-        setBodyParts(data.body_parts);
+        // Merge with existing body parts if backend returns data
+        setBodyParts((prevBodyParts) => ({
+          ...prevBodyParts,
+          ...data.body_parts,
+        }));
       }
     } catch (error) {
       console.error("Failed to fetch body parts:", error);
+      // Frontend will still work with default body parts
     }
   };
 

@@ -12,6 +12,21 @@ dist
 dist-ssr
 *.local
 
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Python virtual environments
+venv/
+env/
+ENV/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
