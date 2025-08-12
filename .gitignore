@@ -38,6 +38,7 @@ ENV/
 *.sln
 *.sw?
 .env
+.env.local
 
 # Python
 venv/

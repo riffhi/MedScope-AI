@@ -5,12 +5,13 @@ import LandingPage from "./components/LandingPage";
 import LoginModal from "./components/LoginModal";
 import SignupModal from "./components/SignupModal";
 import Sidebar from "./Sidebar";
-import DoctorDashboard from './components/DoctorsDashboard';
+import DoctorDashboard from "./components/DoctorsDashboard";
 import UserDashboard from "./components/UserDashboard";
 import Visualization3D from "./Visualization3D";
 import ReportAnalyzer from "./components/ReportAnalyzer";
 import Feedback from "./components/Feedback";
 import FindMRICentre from "./components/FindMRICentre";
+import FloatingAIChatbot from "./components/FloatingAIChatbot";
 
 // Define the User and UserData types for type safety
 interface User {
@@ -142,6 +143,9 @@ function App() {
         />
         <main className="flex-1 p-6">{renderContent()}</main>
       </div>
+
+      {/* Floating AI Chatbot - appears on all authenticated pages */}
+      <FloatingAIChatbot />
     </div>
   );
 }
