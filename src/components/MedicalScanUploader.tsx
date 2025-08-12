@@ -76,7 +76,7 @@ const runMockAnalysis = (
         asymmetry_interpretation: "Mild asymmetry noted.",
         texture_variations: "Minor variations observed.",
         variation_interpretation: "Variations appear benign.",
-        contour_analysis: "Contours appear regular.",
+        contour_analysis: "Contours appear raegular.",
       },
       disclaimer: "This AI analysis is for informational purposes only and is not a substitute for professional medical advice.",
       analysis_timestamp: new Date().toISOString(),

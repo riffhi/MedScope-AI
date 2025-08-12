@@ -13,17 +13,66 @@ import {
   Eye,
   RefreshCw,
 } from "lucide-react";
-import FloatingAIChatbot from "./FloatingAIChatbot";
+import { Client, Databases, Storage, Query, type Models } from 'appwrite';
+
+const client = new Client();
+client
+  .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT) 
+  .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID); 
+
+const databases = new Databases(client);
+const storage = new Storage(client);
+
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const COLLECTION_ID = import.meta.env.VITE_APPWRITE_SCANS_COLLECTION_ID;
+const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET_ID;
+
+// Define the Report interface, extending Appwrite's Document model for type safety
+interface Report extends Models.Document {
+  type: string;
+  patient: string;
+  patientName: string;
+  time: string;
+  date: string;
+  status: 'completed' | 'processing' | 'failed'; // Use specific string literal types for status
+  diagnosis: string;
+  doctor: string;
+  fileId?: string; 
+}
 
 const DoctorDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample data - this will be replaced with API calls to Flask backend
-  const allReports = [
+  // Helper function to format time (e.g., "5 minutes ago")
+  const formatTime = (dateString: string): string => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    } else {
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    }
+  };
+
+  // Sample data fallback
+  const getSampleData = (): Report[] => [
     {
-      id: "RPT-2847",
+      $id: "RPT-2847",
+      $createdAt: new Date(new Date().getTime() - 2 * 60 * 1000).toISOString(),
+      $updatedAt: '',
+      $collectionId: COLLECTION_ID,
+      $databaseId: DATABASE_ID,
       type: "MRI",
       patient: "Patient #2847",
       patientName: "John Smith",
@@ -32,9 +81,14 @@ const DoctorDashboard: React.FC = () => {
       status: "completed",
       diagnosis: "Normal brain scan",
       doctor: "Dr. Smith",
+      fileId: "sample-file-1"
     },
     {
-      id: "RPT-2846",
+      $id: "RPT-2846",
+      $createdAt: new Date(new Date().getTime() - 15 * 60 * 1000).toISOString(),
+      $updatedAt: '',
+      $collectionId: COLLECTION_ID,
+      $databaseId: DATABASE_ID,
       type: "CT Scan",
       patient: "Patient #2846",
       patientName: "Jane Doe",
@@ -43,9 +97,14 @@ const DoctorDashboard: React.FC = () => {
       status: "processing",
       diagnosis: "Pending analysis",
       doctor: "Dr. Smith",
+      fileId: "sample-file-2"
     },
     {
-      id: "RPT-2845",
+      $id: "RPT-2845",
+      $createdAt: new Date(new Date().getTime() - 60 * 60 * 1000).toISOString(),
+      $updatedAt: '',
+      $collectionId: COLLECTION_ID,
+      $databaseId: DATABASE_ID,
       type: "X-Ray",
       patient: "Patient #2845",
       patientName: "Bob Johnson",
@@ -54,91 +113,104 @@ const DoctorDashboard: React.FC = () => {
       status: "completed",
       diagnosis: "Fractured rib",
       doctor: "Dr. Smith",
-    },
-    {
-      id: "RPT-2844",
-      type: "MRI",
-      patient: "Patient #2844",
-      patientName: "Alice Brown",
-      time: "2 hours ago",
-      date: "2025-08-10",
-      status: "completed",
-      diagnosis: "Herniated disc L4-L5",
-      doctor: "Dr. Smith",
-    },
-    {
-      id: "RPT-2843",
-      type: "CT Scan",
-      patient: "Patient #2843",
-      patientName: "Charlie Wilson",
-      time: "1 day ago",
-      date: "2025-08-10",
-      status: "completed",
-      diagnosis: "Lung nodule detected",
-      doctor: "Dr. Smith",
+      fileId: "sample-file-3"
     },
   ];
 
-  // Filter reports based on search term and selected filter
-  const filteredReports = allReports.filter((report) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesFilter =
-      selectedFilter === "all" ||
-      report.status === selectedFilter ||
-      report.type.toLowerCase() === selectedFilter.toLowerCase();
-
-    return matchesSearch && matchesFilter;
-  });
-
-  // Simulate API call to Flask backend
-  const handleSearch = async () => {
-    setIsLoading(true);
-    // TODO: Replace with actual API call to Flask backend
-    // const response = await fetch(`/api/reports/search?term=${searchTerm}&filter=${selectedFilter}`);
-    // const data = await response.json();
-
-    // Simulate network delay
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-  };
-
-  const handleRefresh = async () => {
-    setIsLoading(true);
-    // TODO: Replace with actual API call to Flask backend
-    // const response = await fetch('/api/reports/recent');
-    // const data = await response.json();
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-  };
-
-  const handleViewReport = (reportId: string) => {
-    // TODO: Navigate to report details or open modal
-    console.log(`Viewing report: ${reportId}`);
-  };
-
-  const handleDownloadReport = (reportId: string) => {
-    // TODO: Download report PDF from Flask backend
-    console.log(`Downloading report: ${reportId}`);
-  };
-
+  // Primary effect hook for fetching and filtering reports
   useEffect(() => {
-    if (searchTerm) {
-      const delayedSearch = setTimeout(() => {
-        handleSearch();
-      }, 300);
+    let queries = [
+      Query.orderDesc('$createdAt'),
+      Query.limit(50) 
+    ];
 
-      return () => clearTimeout(delayedSearch);
+    // Apply filters based on state
+    if (selectedFilter !== 'all') {
+        queries.push(Query.equal('status', selectedFilter));
+        queries.push(Query.equal('type', selectedFilter));
     }
+    
+    // Apply search query if a search term is present
+    if (searchTerm.length > 2) {
+      queries.push(Query.search('patientName', searchTerm));
+    }
+    
+    // Debounce the search to prevent excessive API calls
+    const delayedFetch = setTimeout(async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await databases.listDocuments(
+          DATABASE_ID,
+          COLLECTION_ID,
+          queries
+        );
+
+        const fetchedReports: Report[] = response.documents.map((doc: any) => ({
+          ...doc, // Spread all Appwrite document properties
+          $id: doc.$id,
+          type: doc.scanType || doc.type,
+          patientName: doc.patientName,
+          time: formatTime(doc.$createdAt),
+          date: new Date(doc.$createdAt).toISOString().split('T')[0],
+          status: doc.status as Report['status'], // Type assertion
+          diagnosis: doc.diagnosis || 'Pending analysis',
+          doctor: doc.doctorName || 'Dr. Smith',
+        }));
+        
+        setReports(fetchedReports);
+      } catch (err: any) {
+        console.error('Error fetching reports:', err);
+        setError(err.message || 'Failed to fetch reports from Appwrite');
+        setReports(getSampleData()); // Fallback to sample data
+      } finally {
+        setIsLoading(false);
+      }
+    }, searchTerm ? 300 : 0); // Apply 300ms debounce on search
+
+    return () => clearTimeout(delayedFetch);
   }, [searchTerm, selectedFilter]);
+
+  // Handle refresh
+  const handleRefresh = () => {
+    // A simple way to trigger a re-fetch is to change a state variable,
+    // which in turn triggers the useEffect hook.
+    setSearchTerm("");
+    setSelectedFilter("all");
+  };
+
+  // Handle view report
+  const handleViewReport = (report: Report) => {
+    if (report.fileId) {
+      try {
+        const fileUrl = storage.getFilePreview(BUCKET_ID, report.fileId);
+        window.open(fileUrl.toString(), '_blank');
+      } catch (err) {
+        console.error('Error viewing report:', err);
+      }
+    } else {
+      alert(`Report ${report.$id} has no associated file.`);
+    }
+  };
+
+  // Handle download report
+  const handleDownloadReport = (report: Report) => {
+    if (report.fileId) {
+      try {
+        const downloadUrl = storage.getFileDownload(BUCKET_ID, report.fileId);
+        const link = document.createElement('a');
+        link.href = downloadUrl.toString();
+        link.download = `${report.$id}-${report.type}-${report.patientName}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error('Error downloading report:', err);
+      }
+    } else {
+      alert(`Report ${report.$id} has no associated file.`);
+    }
+  };
 
   return (
     <div className="bg-slate-900 text-slate-100 min-h-screen">
@@ -150,7 +222,7 @@ const DoctorDashboard: React.FC = () => {
               Medical Dashboard
             </h1>
             <p className="text-slate-400">
-              Welcome back, Dr. Smith •{" "}
+              Welcome back •{" "}
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -170,8 +242,6 @@ const DoctorDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      {/* Stats Grid */}
       <div className="px-6 pb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-slate-600 transition-all duration-300">
@@ -180,7 +250,7 @@ const DoctorDashboard: React.FC = () => {
                 <p className="text-sm font-medium text-slate-400 mb-1">
                   Total Scans Analyzed
                 </p>
-                <p className="text-3xl font-bold text-white">2,847</p>
+                <p className="text-3xl font-bold text-white">{reports.length}</p>
                 <div className="flex items-center mt-2">
                   <span className="text-emerald-400 text-sm font-medium">
                     +12%
@@ -202,7 +272,9 @@ const DoctorDashboard: React.FC = () => {
                 <p className="text-sm font-medium text-slate-400 mb-1">
                   Active Patients
                 </p>
-                <p className="text-3xl font-bold text-white">456</p>
+                <p className="text-3xl font-bold text-white">
+                  {new Set(reports.map(r => r.patientName)).size}
+                </p>
                 <div className="flex items-center mt-2">
                   <span className="text-emerald-400 text-sm font-medium">
                     +8%
@@ -222,7 +294,9 @@ const DoctorDashboard: React.FC = () => {
                 <p className="text-sm font-medium text-slate-400 mb-1">
                   Reports Generated
                 </p>
-                <p className="text-3xl font-bold text-white">1,234</p>
+                <p className="text-3xl font-bold text-white">
+                  {reports.filter(r => r.status === 'completed').length}
+                </p>
                 <div className="flex items-center mt-2">
                   <span className="text-emerald-400 text-sm font-medium">
                     +15%
@@ -260,10 +334,8 @@ const DoctorDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content Grid */}
       <div className="px-6 space-y-6">
         <div className="w-full max-w-full">
-          {/* Recent Activity with Search */}
           <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-700/50">
             <div className="p-6 border-b border-slate-700/50">
               <div className="flex items-center justify-between mb-4">
@@ -282,7 +354,14 @@ const DoctorDashboard: React.FC = () => {
                 </button>
               </div>
 
-              {/* Search and Filter Controls */}
+              {error && (
+                <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+                  <p className="text-red-400 text-sm">
+                    Error: {error}. Showing sample data.
+                  </p>
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -321,11 +400,11 @@ const DoctorDashboard: React.FC = () => {
                     Loading reports...
                   </span>
                 </div>
-              ) : filteredReports.length > 0 ? (
+              ) : reports.length > 0 ? (
                 <div className="space-y-4">
-                  {filteredReports.slice(0, 6).map((report) => (
+                  {reports.map((report) => (
                     <div
-                      key={report.id}
+                      key={report.$id}
                       className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors duration-200 border border-slate-700/50"
                     >
                       <div className="flex items-center space-x-3">
@@ -340,7 +419,7 @@ const DoctorDashboard: React.FC = () => {
                               {report.type} Analysis
                             </p>
                             <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded border border-slate-600">
-                              {report.id}
+                              {report.$id}
                             </span>
                           </div>
                           <p className="text-sm text-slate-300">
@@ -368,10 +447,9 @@ const DoctorDashboard: React.FC = () => {
                           </span>
                         </div>
 
-                        {/* Action Buttons */}
                         <div className="flex space-x-1">
                           <button
-                            onClick={() => handleViewReport(report.id)}
+                            onClick={() => handleViewReport(report)}
                             className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded transition-colors duration-200"
                             title="View Report"
                           >
@@ -379,7 +457,7 @@ const DoctorDashboard: React.FC = () => {
                           </button>
                           {report.status === "completed" && (
                             <button
-                              onClick={() => handleDownloadReport(report.id)}
+                              onClick={() => handleDownloadReport(report)}
                               className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded transition-colors duration-200"
                               title="Download Report"
                             >
@@ -401,10 +479,10 @@ const DoctorDashboard: React.FC = () => {
                 </div>
               )}
 
-              {filteredReports.length > 6 && (
+              {reports.length > 6 && (
                 <div className="mt-4 text-center">
                   <button className="text-blue-400 hover:text-blue-300 font-medium text-sm">
-                    View All Reports ({filteredReports.length})
+                    View All Reports ({reports.length})
                   </button>
                 </div>
               )}
@@ -413,11 +491,7 @@ const DoctorDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom padding to ensure full coverage */}
       <div className="pb-8"></div>
-
-      {/* Floating AI Chatbot */}
-      <FloatingAIChatbot />
     </div>
   );
 };

@@ -29,6 +29,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const userMenuItems = [
     { id: "dashboard", label: "My Dashboard", icon: LayoutDashboard },
     { id: "find-centre", label: "Find MRI Centre", icon: MapPin },
+    { id: "visualization", label: "2D to 3D Viewer", icon: Eye },
+    { id: "scan-analysis", label: "Medical Scan Analysis", icon: Scan },
     { id: "feedback", label: "Feedback", icon: Star },
   ];
 
@@ -70,10 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
             <Zap className="w-4 h-4 text-white" />
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-200">AI Processing</p>
-            <p className="text-xs text-slate-400">Ready</p>
-          </div>
+         
         </div>
       </div>
     </aside>
