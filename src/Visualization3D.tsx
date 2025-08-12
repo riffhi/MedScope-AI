@@ -1,230 +1,368 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import Plot from "react-plotly.js";
 import {
   Play,
   Pause,
-  RotateCw,
   ZoomIn,
   ZoomOut,
-  Layers,
-  Settings,
   Upload,
   Eye,
-  Maximize,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
+import {
+  visualization3DAPI,
+  VolumeResponse,
+  VolumeStats,
+  LibraryStatus,
+} from "./services/visualization3dAPI";
+
+// Define a single type for our volume data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PlotData = any; // Using any to bypass TypeScript errors for now
 
 const Visualization3D: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentSlice, setCurrentSlice] = useState(50);
   const [zoom, setZoom] = useState(100);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [plotData, setPlotData] = useState<PlotData | null>(null);
+  const [volumeStats, setVolumeStats] = useState<VolumeStats | null>(null);
+  const [volumeName, setVolumeName] = useState<string>("");
+  const [libraryStatus, setLibraryStatus] = useState<LibraryStatus | null>(
+    null
+  );
+
+  // Simplified rendering options
+  const renderingOptions = {
+    quality: "high",
+    opacity: 25,
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch library status on component mount
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const status = await visualization3DAPI.getStatus();
+        setLibraryStatus(status);
+      } catch (error) {
+        console.error("Failed to fetch library status:", error);
+      }
+    };
+    fetchStatus();
+  }, []);
+
+  const processVolumeResponse = useCallback(
+    (response: VolumeResponse) => {
+      const { data, stats, name } = response;
+
+      setVolumeName(name);
+      setVolumeStats(stats);
+
+      const plotTrace: PlotData = {
+        type: "volume",
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        value: data.values,
+        isomin: data.isomin,
+        isomax: data.isomax,
+        opacity: renderingOptions.opacity / 100,
+        surface_count: renderingOptions.quality === "high" ? 20 : 15,
+        colorscale: [
+          [0.0, "rgba(0,0,50,0)"],
+          [0.2, "rgba(0,100,200,0.3)"],
+          [0.4, "rgba(0,200,200,0.5)"],
+          [0.6, "rgba(100,255,100,0.7)"],
+          [0.8, "rgba(255,255,0,0.8)"],
+          [1.0, "rgba(255,100,0,0.9)"],
+        ],
+        showscale: true,
+        colorbar: {
+          title: { text: "Intensity", side: "right" },
+          tickmode: "linear",
+          tick0: data.isomin,
+          dtick: (data.isomax - data.isomin) / 5,
+        },
+      };
+
+      setPlotData(plotTrace);
+    },
+    [renderingOptions.opacity, renderingOptions.quality]
+  );
+
+  const handleFileUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      // Validate file
+      const validation = visualization3DAPI.validateFile(file);
+      if (!validation.valid) {
+        setError(validation.error || "Invalid file");
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await visualization3DAPI.uploadFile(file);
+        processVolumeResponse(response);
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : "Failed to upload file"
+        );
+      } finally {
+        setIsLoading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    },
+    [processVolumeResponse]
+  );
+
+  // No unused functions anymore
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const plotLayout: any = {
+    title: {
+      text: `3D Medical Visualization - ${volumeName}`,
+      x: 0.5,
+      xanchor: "center",
+      font: { size: 20, color: "white" },
+    },
+    scene: {
+      xaxis: {
+        title: "X-axis",
+        showgrid: true,
+        gridcolor: "rgba(100,100,100,0.3)",
+        showbackground: true,
+        backgroundcolor: "rgba(20,20,40,0.8)",
+        color: "white",
+      },
+      yaxis: {
+        title: "Y-axis",
+        showgrid: true,
+        gridcolor: "rgba(100,100,100,0.3)",
+        showbackground: true,
+        backgroundcolor: "rgba(20,20,40,0.8)",
+        color: "white",
+      },
+      zaxis: {
+        title: "Z-axis",
+        showgrid: true,
+        gridcolor: "rgba(100,100,100,0.3)",
+        showbackground: true,
+        backgroundcolor: "rgba(20,20,40,0.8)",
+        color: "white",
+      },
+      aspectmode: "auto",
+      camera: {
+        eye: { x: 1.8, y: 1.8, z: 1.8 },
+        center: { x: 0, y: 0, z: 0 },
+        up: { x: 0, y: 0, z: 1 },
+      },
+      bgcolor: "rgba(10,10,20,0.9)",
+    },
+    paper_bgcolor: "rgba(20,20,30,0)",
+    plot_bgcolor: "rgba(10,10,20,0)",
+    margin: { l: 10, r: 10, b: 10, t: 60 },
+    font: { color: "white" },
+    showlegend: false,
+  };
+
+  const plotConfig = {
+    displayModeBar: true,
+    displaylogo: false,
+    responsive: true,
+  };
 
   return (
-    <div className="space-y-6 bg-slate-900 text-slate-100 p-6 min-h-screen">
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-2">
-          2D to 3D Visualization
-        </h2>
-        <p className="text-slate-400">
-          Transform medical imaging data into interactive 3D models
-        </p>
+    <div className="space-y-4 bg-slate-900 text-slate-100 p-3 min-h-screen max-w-[2000px] mx-auto">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-white">
+            2D to 3D Visualization
+          </h2>
+          <p className="text-slate-400">
+            Transform medical imaging data into interactive 3D models
+          </p>
+        </div>
+        {libraryStatus && (
+          <div className="flex items-center space-x-4 text-sm">
+            <span className="text-slate-500">Backend Libraries:</span>
+            {libraryStatus.libraries.monai && (
+              <span className="flex items-center text-green-400">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                MONAI
+              </span>
+            )}
+            {libraryStatus.libraries.nibabel && (
+              <span className="flex items-center text-blue-400">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                NiBabel
+              </span>
+            )}
+            {libraryStatus.libraries.pydicom && (
+              <span className="flex items-center text-purple-400">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                PyDICOM
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {/* Main Viewer */}
-        <div className="xl:col-span-3">
-          <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
-            <div className="p-4 border-b border-slate-700/50">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">
-                  3D Model Viewer
-                </h3>
-                <div className="flex items-center space-x-2">
-                  <button className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors">
-                    <Maximize className="w-4 h-4" />
-                  </button>
-                  <button className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors">
-                    <Settings className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              {/* 3D Viewer Placeholder */}
-              <div className="h-96 bg-gradient-to-br from-slate-800 to-slate-900 rounded-b-xl flex items-center justify-center border-t border-slate-700/30">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/30">
-                    <Eye className="w-8 h-8 text-blue-400" />
-                  </div>
-                  <h4 className="text-lg font-medium text-white mb-2">
-                    3D Model Viewer
-                  </h4>
-                  <p className="text-slate-400 mb-4">
-                    Upload MRI/CT scan data to generate 3D visualization
-                  </p>
-                  <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors mx-auto border border-blue-500/30">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload DICOM Files</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Controls Overlay */}
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="bg-slate-800/90 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-slate-600/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <button
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors border border-blue-500/30"
-                      >
-                        {isPlaying ? (
-                          <Pause className="w-4 h-4" />
-                        ) : (
-                          <Play className="w-4 h-4" />
-                        )}
-                        <span className="text-sm">
-                          {isPlaying ? "Pause" : "Rotate"}
-                        </span>
-                      </button>
-
-                      <div className="flex items-center space-x-2">
-                        <button className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors">
-                          <ZoomOut className="w-4 h-4" />
-                        </button>
-                        <span className="text-sm font-medium text-slate-200 min-w-12 text-center">
-                          {zoom}%
-                        </span>
-                        <button className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors">
-                          <ZoomIn className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-slate-400">Slice:</span>
-                      <input
-                        type="range"
-                        min="1"
-                        max="100"
-                        value={currentSlice}
-                        onChange={(e) =>
-                          setCurrentSlice(parseInt(e.target.value))
-                        }
-                        className="w-20 accent-blue-500"
-                      />
-                      <span className="text-sm font-medium text-slate-200 min-w-8">
-                        {currentSlice}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* Upload Controls - Simplified and more compact */}
+      <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 p-2 flex items-center">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".nii,.nii.gz,.dcm,.mhd,.mha,.nrrd,.img,.hdr"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isLoading}
+          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors border border-blue-500/30"
+        >
+          <Upload className="w-4 h-4" />
+          <span>Upload Medical File</span>
+        </button>
+        <p className="text-xs text-slate-400 ml-3">
+          Supports: NIfTI, DICOM, MHD, NRRD formats
+        </p>
+        {error && (
+          <div className="ml-4 flex items-center space-x-2 text-red-400">
+            <AlertCircle className="w-4 h-4" />
+            <span className="text-sm">{error}</span>
+            <button
+              onClick={() => setError(null)}
+              className="ml-2 text-red-400 hover:text-red-300"
+            >
+              ×
+            </button>
           </div>
+        )}
+      </div>
+
+      {/* Error Display moved to the upload bar */}
+
+      {/* Main 3D Viewer - Simplified header */}
+      <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
+        <div className="p-2 border-b border-slate-700/30">
+          {volumeStats ? (
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold text-white">
+                {volumeName}
+              </h3>
+              <div className="flex items-center space-x-4 text-xs">
+                <span className="text-slate-400">
+                  Dimensions:{" "}
+                  <span className="text-white">{volumeStats.dimensions}</span>
+                </span>
+                <span className="text-slate-400">
+                  Volume:{" "}
+                  <span className="text-white">
+                    {volumeStats.volume_cm3} cm³
+                  </span>
+                </span>
+                <span className="text-slate-400">
+                  Library:{" "}
+                  <span className="text-white">{volumeStats.library_used}</span>
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold text-white">
+                3D Medical Visualization
+              </h3>
+              <div className="flex items-center space-x-4 text-xs">
+                <span className="text-slate-400">Ready for visualization</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Side Panel */}
-        <div className="space-y-6">
-          {/* Layer Controls */}
-          <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
-            <div className="p-4 border-b border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white flex items-center">
-                <Layers className="w-5 h-5 mr-2 text-blue-400" />
-                Layer Controls
-              </h3>
-            </div>
-            <div className="p-4 space-y-4">
-              {["Bone", "Soft Tissue", "Blood Vessels", "Organs"].map(
-                (layer, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        defaultChecked={index < 2}
-                        className="w-4 h-4 text-blue-500 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
-                      />
-                      <span className="text-sm text-slate-200">{layer}</span>
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      defaultValue="80"
-                      className="w-16 accent-blue-500"
-                    />
+        <div className="relative">
+          {/* 3D Viewer - Increased height to 90vh */}
+          <div className="h-[90vh] bg-gradient-to-br from-slate-800 to-slate-900 rounded-b-xl">
+            {isLoading ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <RefreshCw className="w-10 h-10 text-blue-400 animate-spin mx-auto mb-4" />
+                  <h4 className="text-xl font-medium text-white mb-2">
+                    Processing Medical Image...
+                  </h4>
+                  <p className="text-slate-400">Generating 3D visualization</p>
+                </div>
+              </div>
+            ) : plotData ? (
+              <Plot
+                data={[plotData]}
+                layout={plotLayout}
+                config={plotConfig}
+                style={{ width: "100%", height: "100%" }}
+                useResizeHandler={true}
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-blue-500/30">
+                    <Eye className="w-12 h-12 text-blue-400" />
                   </div>
-                )
-              )}
-            </div>
+                  <h4 className="text-2xl font-medium text-white mb-4">
+                    3D Medical Visualization
+                  </h4>
+                  <p className="text-slate-400 mb-6 text-lg max-w-lg">
+                    Upload your medical scan to generate an interactive 3D
+                    visualization
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Rendering Options */}
-          <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
-            <div className="p-4 border-b border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white">
-                Rendering Options
-              </h3>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Quality
-                </label>
-                <select className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                  <option>High Quality</option>
-                  <option>Medium Quality</option>
-                  <option>Low Quality</option>
-                </select>
-              </div>
+          {/* Minimal Controls Overlay */}
+          {plotData && (
+            <div className="absolute top-4 right-4">
+              <div className="bg-slate-800/60 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-slate-600/30 flex items-center space-x-2">
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="p-2 text-slate-300 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                >
+                  {isPlaying ? (
+                    <Pause className="w-5 h-5" />
+                  ) : (
+                    <Play className="w-5 h-5" />
+                  )}
+                </button>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Lighting
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  defaultValue="70"
-                  className="w-full accent-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Contrast
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  defaultValue="50"
-                  className="w-full accent-blue-500"
-                />
+                <button
+                  onClick={() => setZoom(Math.max(10, zoom - 10))}
+                  className="p-2 text-slate-300 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                >
+                  <ZoomOut className="w-5 h-5" />
+                </button>
+                <span className="text-xs font-medium text-slate-300 min-w-8 text-center">
+                  {zoom}%
+                </span>
+                <button
+                  onClick={() => setZoom(Math.min(500, zoom + 10))}
+                  className="p-2 text-slate-300 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                >
+                  <ZoomIn className="w-5 h-5" />
+                </button>
               </div>
             </div>
-          </div>
-
-          {/* Export Options */}
-          <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
-            <div className="p-4 border-b border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white">Export</h3>
-            </div>
-            <div className="p-4 space-y-3">
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm border border-blue-500/30">
-                Export as STL
-              </button>
-              <button className="w-full bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-colors text-sm border border-slate-500/30">
-                Export as OBJ
-              </button>
-              <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors text-sm border border-emerald-500/30">
-                Save as Image
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

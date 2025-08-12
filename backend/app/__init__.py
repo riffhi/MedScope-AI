@@ -22,12 +22,14 @@ def create_app():
     from .api.routes.analysis_simple import analysis_bp
     from .api.routes.chat_simple import chat_bp
     from .api.routes.scan_report import scan_bp
+    from .api.routes.visualization_3d import visualization_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(reports_bp, url_prefix='/api/v1/reports')
     app.register_blueprint(analysis_bp, url_prefix='/api/v1/analysis')
     app.register_blueprint(chat_bp, url_prefix='/api/v1/chat')
     app.register_blueprint(scan_bp, url_prefix='/api/v1/scan')
+    app.register_blueprint(visualization_bp, url_prefix='/api/v1/visualization')
 
     @app.route("/")
     def root():
