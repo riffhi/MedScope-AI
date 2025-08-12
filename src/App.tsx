@@ -8,7 +8,7 @@ import Sidebar from "./Sidebar";
 import DoctorDashboard from './components/DoctorsDashboard';
 import UserDashboard from "./components/UserDashboard";
 import Visualization3D from "./Visualization3D";
-import MedicalScanUploader from "./components/MedicalScanUploader";
+import ReportAnalyzer from "./components/ReportAnalyzer";
 import Feedback from "./components/Feedback";
 import FindMRICentre from "./components/FindMRICentre";
 
@@ -75,7 +75,7 @@ function App() {
         case "visualization":
           return <Visualization3D />;
         case "scan-analysis":
-          return <MedicalScanUploader />;
+          return <ReportAnalyzer />;
         case "feedback":
           return <Feedback />;
         default:

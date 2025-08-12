@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReportAnalyzer Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        const ReportAnalyzer = () => {
+            const [activeAnalyzer, setActiveAnalyzer] = useState("MRI");
+            const [uploadedFiles, setUploadedFiles] = useState([]);
+            const [analysisStatus, setAnalysisStatus] = useState("idle");
+            const [analysisResults, setAnalysisResults] = useState(null);
+
+            const generateAnalysisResults = (scanType) => {
+                const scenarios = {
+                    MRI: [{
+                        riskLevel: "MODERATE",
+                        riskScore: "5.8/10",
+                        urgency: "PRIORITY",
+                        urgencyDetail: "Follow-up in 2-4 weeks",
+                        treatment: "CONSULTATION",
+                        treatmentDetail: "Neurologist consultation recommended",
+                        findings: [
+                            "Small hyperintense lesions identified in periventricular white matter",
+                            "Possible early signs of small vessel disease or demyelination",
+                            "Ventricular system remains within normal limits",
+                            "No acute hemorrhage or mass effect detected",
+                            "Mild cerebral atrophy consistent with age-related changes"
+                        ],
+                        recommendations: {
+                            immediate: [
+                                "Neurologist consultation within 2-4 weeks",
+                                "Consider additional blood work and vitamin B12 levels",
+                                "Monitor for cognitive changes or new symptoms"
+                            ],
+                            followUp: [
+                                "Repeat MRI in 3-6 months to assess progression",
+                                "Regular neurological assessments",
+                                "Consider MR spectroscopy if lesions progress"
+                            ]
+                        },
+                        confidence: 87,
+                        processingTime: "2.8s"
+                    }]
+                };
+                return scenarios[scanType][0];
+            };
+
+            const startAnalysis = () => {
+                setAnalysisStatus("processing");
+                setTimeout(() => {
+                    const results = generateAnalysisResults(activeAnalyzer);
+                    setAnalysisResults(results);
+                    setAnalysisStatus("completed");
+                }, 3000);
+            };
+
+            const generatePDFReport = async () => {
+                try {
+                    console.log('Starting PDF generation...');
+                    const reportElement = document.getElementById('medical-report');
+                    if (!reportElement) {
+                        alert('Report element not found! Please complete analysis first.');
+                        return;
+                    }
+
+                    const canvas = await html2canvas(reportElement, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff'
+                    });
+
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    
+                    // Add colorful header
+                    pdf.setFillColor(59, 130, 246);
+                    pdf.rect(0, 0, 210, 35, 'F');
+                    
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.setFontSize(24);
+                    pdf.text('🏥 MedScope AI - Medical Report', 20, 22);
+                    
+                    // Add date and report info
+                    pdf.setFontSize(12);
+                    pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 140, 30);
+                    pdf.text(`Type: ${activeAnalyzer} Analysis`, 20, 30);
+                    
+                    // Add main content
+                    const imgWidth = 170;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    pdf.addImage(imgData, 'PNG', 20, 45, imgWidth, imgHeight);
+                    
+                    // Add colorful footer
+                    const pageHeight = pdf.internal.pageSize.height;
+                    pdf.setFillColor(241, 245, 249);
+                    pdf.rect(0, pageHeight - 25, 210, 25, 'F');
+                    
+                    pdf.setTextColor(71, 85, 105);
+                    pdf.setFontSize(10);
+                    pdf.text('⚕️ This report is generated by MedScope AI for medical reference only.', 20, pageHeight - 15);
+                    pdf.text('Please consult with a qualified healthcare professional.', 20, pageHeight - 8);
+                    
+                    const fileName = `MedScope-AI-Report-${activeAnalyzer}-${new Date().toISOString().slice(0,10)}.pdf`;
+                    pdf.save(fileName);
+                    
+                    alert('✅ PDF Report downloaded successfully!');
+                } catch (error) {
+                    console.error('PDF generation error:', error);
+                    alert('❌ Error generating PDF. Please try again.');
+                }
+            };
+
+            const handleFileUpload = (files) => {
+                if (files) {
+                    setUploadedFiles(Array.from(files));
+                }
+            };
+
+            return (
+                <div className="space-y-6 bg-slate-900 text-slate-100 p-6 min-h-screen">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white mb-2">Medical Report Analyzer - TEST</h2>
+                        <p className="text-slate-400">AI-powered analysis with enhanced descriptive results and PDF download</p>
+                    </div>
+
+                    <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50">
+                        <div className="p-4 border-b border-slate-700/50">
+                            <h3 className="text-lg font-semibold text-white">Upload Medical Scan</h3>
+                        </div>
+                        <div className="p-6">
+                            <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center hover:border-slate-500 transition-colors">
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept=".dcm,.jpg,.jpeg,.png"
+                                    onChange={(e) => handleFileUpload(e.target.files)}
+                                    className="hidden"
+                                    id="file-upload"
+                                />
+                                <label htmlFor="file-upload" className="cursor-pointer">
+                                    <div className="text-slate-400 mb-4">
+                                        📁 Click to upload medical scan files
+                                    </div>
+                                    <p className="text-sm text-slate-500">DICOM, JPEG, PNG files supported</p>
+                                </label>
+                            </div>
+
+                            {uploadedFiles.length > 0 && (
+                                <div className="mt-4">
+                                    <p className="text-sm text-slate-300 mb-2">Uploaded files:</p>
+                                    <ul className="text-sm text-slate-400">
+                                        {uploadedFiles.map((file, index) => (
+                                            <li key={index}>• {file.name}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            <div className="mt-6">
+                                <button
+                                    onClick={startAnalysis}
+                                    disabled={uploadedFiles.length === 0 || analysisStatus === "processing"}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 disabled:cursor-not-allowed"
+                                >
+                                    {analysisStatus === "processing" ? "⚡ Analyzing..." : "🔍 Start Analysis"}
+                                </button>
+                            </div>
+
+                            {analysisStatus === "processing" && (
+                                <div className="mt-6 bg-slate-700/50 rounded-lg p-4">
+                                    <p className="text-slate-300 mb-2">AI is analyzing your {activeAnalyzer.toLowerCase()} images</p>
+                                    <div className="w-full bg-slate-700 rounded-full h-2">
+                                        <div className="bg-amber-400 h-2 rounded-full animate-pulse" style={{width: "60%"}}></div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {analysisStatus === "completed" && (
+                                <div id="medical-report" className="space-y-6 bg-white p-6 rounded-lg text-gray-900 mt-6">
+                                    {/* Report Header */}
+                                    <div className="border-b-2 border-blue-500 pb-4 mb-6">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-blue-600 flex items-center gap-2">
+                                                    🩺 Medical Analysis Report
+                                                </h3>
+                                                <p className="text-gray-600 mt-1">{activeAnalyzer} Scan Analysis</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-sm text-gray-500">Report ID: MA-{Date.now().toString().slice(-6)}</p>
+                                                <p className="text-sm text-gray-500">Date: {new Date().toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Risk Assessment */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                        <div className={`bg-gradient-to-r ${analysisResults?.riskLevel === 'LOW' ? 'from-green-50 to-emerald-50 border-l-4 border-green-500' : analysisResults?.riskLevel === 'MODERATE' ? 'from-yellow-50 to-amber-50 border-l-4 border-yellow-500' : 'from-red-50 to-rose-50 border-l-4 border-red-500'} p-4 rounded-lg`}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-2xl">🛡️</span>
+                                                <h4 className={`font-semibold ${analysisResults?.riskLevel === 'LOW' ? 'text-green-800' : analysisResults?.riskLevel === 'MODERATE' ? 'text-yellow-800' : 'text-red-800'}`}>Risk Level</h4>
+                                            </div>
+                                            <p className={`text-2xl font-bold ${analysisResults?.riskLevel === 'LOW' ? 'text-green-700' : analysisResults?.riskLevel === 'MODERATE' ? 'text-yellow-700' : 'text-red-700'}`}>{analysisResults?.riskLevel || 'LOW'}</p>
+                                            <p className={`text-sm mt-1 ${analysisResults?.riskLevel === 'LOW' ? 'text-green-600' : analysisResults?.riskLevel === 'MODERATE' ? 'text-yellow-600' : 'text-red-600'}`}>Score: {analysisResults?.riskScore || '2.1/10'}</p>
+                                        </div>
+
+                                        <div className={`bg-gradient-to-r ${analysisResults?.urgency === 'ROUTINE' ? 'from-blue-50 to-cyan-50 border-l-4 border-blue-500' : analysisResults?.urgency === 'PRIORITY' ? 'from-orange-50 to-amber-50 border-l-4 border-orange-500' : 'from-red-50 to-pink-50 border-l-4 border-red-500'} p-4 rounded-lg`}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-2xl">⏰</span>
+                                                <h4 className={`font-semibold ${analysisResults?.urgency === 'ROUTINE' ? 'text-blue-800' : analysisResults?.urgency === 'PRIORITY' ? 'text-orange-800' : 'text-red-800'}`}>Urgency</h4>
+                                            </div>
+                                            <p className={`text-2xl font-bold ${analysisResults?.urgency === 'ROUTINE' ? 'text-blue-700' : analysisResults?.urgency === 'PRIORITY' ? 'text-orange-700' : 'text-red-700'}`}>{analysisResults?.urgency || 'ROUTINE'}</p>
+                                            <p className={`text-sm mt-1 ${analysisResults?.urgency === 'ROUTINE' ? 'text-blue-600' : analysisResults?.urgency === 'PRIORITY' ? 'text-orange-600' : 'text-red-600'}`}>{analysisResults?.urgencyDetail || 'Follow-up in 6-12 months'}</p>
+                                        </div>
+
+                                        <div className={`bg-gradient-to-r ${analysisResults?.treatment === 'MONITORING' ? 'from-purple-50 to-indigo-50 border-l-4 border-purple-500' : analysisResults?.treatment === 'CONSULTATION' ? 'from-amber-50 to-yellow-50 border-l-4 border-amber-500' : 'from-red-50 to-rose-50 border-l-4 border-red-500'} p-4 rounded-lg`}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-2xl">❤️</span>
+                                                <h4 className={`font-semibold ${analysisResults?.treatment === 'MONITORING' ? 'text-purple-800' : analysisResults?.treatment === 'CONSULTATION' ? 'text-amber-800' : 'text-red-800'}`}>Treatment</h4>
+                                            </div>
+                                            <p className={`text-2xl font-bold ${analysisResults?.treatment === 'MONITORING' ? 'text-purple-700' : analysisResults?.treatment === 'CONSULTATION' ? 'text-amber-700' : 'text-red-700'}`}>{analysisResults?.treatment || 'MONITORING'}</p>
+                                            <p className={`text-sm mt-1 ${analysisResults?.treatment === 'MONITORING' ? 'text-purple-600' : analysisResults?.treatment === 'CONSULTATION' ? 'text-amber-600' : 'text-red-600'}`}>{analysisResults?.treatmentDetail || 'No immediate intervention'}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Key Findings */}
+                                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg p-6">
+                                        <h4 className="font-bold text-emerald-800 mb-4 flex items-center gap-2">
+                                            <span className="text-2xl">✅</span>
+                                            Key Clinical Findings - {activeAnalyzer}
+                                        </h4>
+                                        <div className="grid grid-cols-1 gap-4">
+                                            <div>
+                                                <h5 className="font-semibold text-emerald-700 mb-2">Primary Observations:</h5>
+                                                <ul className="text-sm text-emerald-700 space-y-2">
+                                                    {analysisResults?.findings?.map((finding, index) => (
+                                                        <li key={index} className="flex items-start gap-2">
+                                                            <span className="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></span>
+                                                            <span>{finding}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Detailed Metrics */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-2xl">📊</span>
+                                                <h5 className="font-semibold text-blue-800">AI Confidence</h5>
+                                            </div>
+                                            <div className="flex items-center space-x-2 mb-2">
+                                                <div className="flex-1 bg-blue-200 rounded-full h-3">
+                                                    <div className="bg-blue-600 h-3 rounded-full" style={{width: `${analysisResults?.confidence || 94}%`}}></div>
+                                                </div>
+                                                <span className="text-sm font-bold text-blue-700">{analysisResults?.confidence || 94}%</span>
+                                            </div>
+                                            <p className="text-xs text-blue-600">High reliability score</p>
+                                        </div>
+
+                                        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-2xl">⚡</span>
+                                                <h5 className="font-semibold text-green-800">Processing Time</h5>
+                                            </div>
+                                            <p className="text-2xl font-bold text-green-700">{analysisResults?.processingTime || '2.3s'}</p>
+                                            <p className="text-xs text-green-600">Ultra-fast analysis</p>
+                                        </div>
+
+                                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-2xl">🧠</span>
+                                                <h5 className="font-semibold text-purple-800">AI Model</h5>
+                                            </div>
+                                            <p className="text-lg font-bold text-purple-700">MedScope v3.2</p>
+                                            <p className="text-xs text-purple-600">Latest neural network</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Recommendations */}
+                                    <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-6">
+                                        <h4 className="font-bold text-amber-800 mb-4 flex items-center gap-2">
+                                            <span className="text-2xl">📋</span>
+                                            Clinical Recommendations
+                                        </h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <h5 className="font-semibold text-amber-700 mb-3">Immediate Actions:</h5>
+                                                <ul className="space-y-2 text-sm text-amber-700">
+                                                    {analysisResults?.recommendations?.immediate?.map((action, index) => (
+                                                        <li key={index} className="flex items-center gap-2">
+                                                            <span className="text-green-500">✅</span>
+                                                            <span>{action}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <h5 className="font-semibold text-amber-700 mb-3">Follow-up Plan:</h5>
+                                                <ul className="space-y-2 text-sm text-amber-700">
+                                                    {analysisResults?.recommendations?.followUp?.map((plan, index) => (
+                                                        <li key={index} className="flex items-center gap-2">
+                                                            <span className="text-blue-500">📅</span>
+                                                            <span>{plan}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-200">
+                                        <button 
+                                            onClick={generatePDFReport}
+                                            className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                                        >
+                                            <span className="text-xl">📄</span>
+                                            <span className="font-semibold">Download PDF Report</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Disclaimer */}
+                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-6">
+                                        <p className="text-xs text-gray-600 text-center">
+                                            <strong>Medical Disclaimer:</strong> This AI-generated report is for informational purposes only and should not replace professional medical advice. 
+                                            Always consult with qualified healthcare professionals for proper diagnosis and treatment decisions.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<ReportAnalyzer />, document.getElementById('root'));
+    </script>
+</body>
+</html>
